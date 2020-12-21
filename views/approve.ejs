@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Approve Study Guides</title>
+	</head>
+	<body>
+		<h1>Approve Study Guides</h1>
+		<form action="/approve" method="POST">
+			<table>
+				<tr>
+					<th>Approve?</th>
+					<th>Delete?</th>
+					<th>Submitted By</th>
+					<th>Submitter Email</th>
+					<th>Title</th>
+					<th>Subject</th>
+					<th>Link</th>
+				</tr>
+				<% guides.forEach(function(guide) { %>
+					<tr>
+						<td>
+							<% if (!guide.approved) { %>
+								<input type="checkbox" name="approve<%= guide.id %>">
+							<% } else {%>
+								Approved
+							<% } %>
+						</td>
+						<td><input type="checkbox" name="delete<%= guide.id %>"></td>
+						<td><%= guide.submittedby %></td>
+						<td><%= guide.email %></td>
+						<td><%= guide.title %></td>
+						<td><%= guide.subject %></td>
+						<td><a href="<%= guide.link %>"><%= guide.link %></a></td>
+					</tr>
+				<% }) %>
+			</table>
+			<label>Code for authentication: <input name="code"></label>
+			<button type="submit">Submit</button>
+		</form>
+	</body>
+</html>
