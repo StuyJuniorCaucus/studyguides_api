@@ -4,7 +4,7 @@ const client = new Client({
 	//if you're not victor and you're reading this, you might
 	//need to change the below value
 	connectionString: process.env.DATABASE_URL || "postgresql://victor@localhost/studyguides",
-	ssl: process.env.DATABASE_URL !== ""
+	ssl: process.env.DATABASE_URL === "" ? false : {rejectUnauthorized: false}
 })
 const init = async () => {
 	await client.connect()
