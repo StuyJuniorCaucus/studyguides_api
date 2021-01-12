@@ -3,6 +3,7 @@ import {dirname} from "path"
 import {fileURLToPath} from "url"
 
 import express from "express"
+import cors from "cors"
 const app = express()
 app.set("view engine", "ejs")
 app.use(express.urlencoded())
@@ -14,7 +15,7 @@ await init()
 app.get("/", (req, res) => {
 	res.sendFile("views/index.html", {root: dirname(fileURLToPath(import.meta.url))})
 })
-app.get("/guides", async (req, res) => {
+app.get("/guides", cors(), async (req, res) => {
 	res.json(await getGuides())
 })
 app.get("/approve", async (req, res) => {
@@ -32,7 +33,7 @@ app.post("/approve", async (req, res) => {
 	})
 	res.redirect("/approve")
 })
-app.post("/submit", async (req, res) => {
+app.post("/submit", cors(), async (req, res) => {
 	if (!req.body.submittedBy || !req.body.title || !req.body.subject || !req.body.link || !req.body.email) {
 		res.send(400, "One or more parameters is missing!")
 		return
