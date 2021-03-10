@@ -53,7 +53,7 @@ const deleteUpdate = async ({id}) => {
 	await client.query("DELETE FROM updates WHERE id=$1", [id])
 }
 const getUpdates = async () => {
-	const res = await client.query("SELECT * FROM updates")
+	const res = await client.query("SELECT * FROM updates ORDER BY date DESC")
 	return res.rows
 }
 
@@ -75,7 +75,7 @@ const deleteDoc = async ({id}) => {
 	await client.query("DELETE FROM documents WHERE id=$1", [id])
 }
 const getDocs = async () => {
-	const res = await client.query("SELECT * FROM documents")
+	const res = await client.query("SELECT * FROM documents ORDER BY date DESC")
 	return res.rows
 }
 

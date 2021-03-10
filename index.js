@@ -53,4 +53,29 @@ app.get("/updatesAndDocuments", async (req, res) => {
 	res.render("updatesAndDocuments.ejs", {updates: await db.updates.get(), documents: await db.documents.get()})
 })
 
+app.post("/createUpdate", async (req, res) => {
+	if (!req.body.title || !req.body.body || !req.body.code) {
+		res.send(400, "One or more parameters is missing!")
+		return
+	}
+	if (req.body.code !== CODE) {
+		res.send("Invalid code!")
+		return
+	}
+	await db.updates.new({title: req.body.title, body: req.body.body})
+	res.redirect("/updatesAndDocuments")
+})
+app.post("/createDoc", async (req, res) => {
+	if (!req.body.title || !req.body.body || !req.body.category || !req.body.code) {
+		res.send(400, "One or more parameters is missing!")
+		return
+	}
+	if (req.body.code !== CODE) {
+		res.send("Invalid code!")
+		return
+	}
+	await db.documents.new({title: req.body.title, body: req.body.body, category: req.body.category})
+	res.redirect("/updatesAndDocuments")
+})
+
 app.listen(PORT, () => console.log("Started"))
