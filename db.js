@@ -4,13 +4,14 @@ const client = new Client({
 	//if you're not victor and you're reading this, you might
 	//need to change the below value
 	connectionString: process.env.DATABASE_URL || "postgresql://victor@localhost/studyguides",
-	ssl: process.env.DATABASE_URL === "" ? false : {rejectUnauthorized: false}
+//	ssl: process.env.DATABASE_URL === "" ? false : {rejectUnauthorized: false}
+	ssl: false
 })
 const init = async () => {
 	await client.connect()
 	await client.query("CREATE TABLE IF NOT EXISTS studyguides (id SERIAL PRIMARY KEY, submittedBy TEXT, title TEXT, subject TEXT, approved BOOLEAN, link TEXT, email TEXT)")
-	await client.query("CREATE TABLE IF NOT EXISTS updates (id SERIAL PRIMARY KEY, date DATETIME, title TEXT, body TEXT)")
-	await client.query("CREATE TABLE IF NOT EXISTS documents (id SERIAL PRIMARY KEY, date DATETIME, title TEXT, body TEXT, category TEXT)")
+	await client.query("CREATE TABLE IF NOT EXISTS updates (id SERIAL PRIMARY KEY, date TIMESTAMP, title TEXT, body TEXT)")
+	await client.query("CREATE TABLE IF NOT EXISTS documents (id SERIAL PRIMARY KEY, date TIMESTAMP, title TEXT, body TEXT, category TEXT)")
 	console.log("DB initialized")
 }
 
@@ -53,7 +54,7 @@ const deleteUpdate = async ({id}) => {
 }
 const getUpdates = async () => {
 	const res = await client.query("SELECT * FROM updates")
-	return res
+	return res.rows
 }
 
 const newDoc = async ({title, body, category}) => {
@@ -75,10 +76,10 @@ const deleteDoc = async ({id}) => {
 }
 const getDocs = async () => {
 	const res = await client.query("SELECT * FROM documents")
-	return res
+	return res.rows
 }
 
-export {
+export default {
 	init,
 	guides: {
 		new: newGuide,
