@@ -52,6 +52,18 @@ app.post("/submit", cors(), async (req, res) => {
 app.get("/updatesAndDocuments", async (req, res) => {
 	res.render("updatesAndDocuments.ejs", {updates: await db.updates.get(), documents: await db.documents.get()})
 })
+app.get("/updates", async (req, res) => {
+	res.json(await db.updates.get())
+})
+app.get("/documents", async (req, res) => {
+	const documents = await db.documents.get()
+	const restructuredDocuments = {}
+	documents.forEach(doc => {
+		if (restructuredDocuments[doc.category]) restructuredDocuments[doc.category].push(doc);
+		else restructuredDocuments[doc.category] = [doc]
+	})
+	res.json(restructuredDocuments)
+})
 
 app.post("/createUpdate", async (req, res) => {
 	if (!req.body.title || !req.body.body || !req.body.code) {
