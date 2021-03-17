@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Updates and Documents</title>
+</head>
+<body>
+	<h1>Updates and Documents</h1>
+	<h2>Updates</h2>
+	<form action="/createUpdate" method="POST">
+		<label>Title: <input name="title"></label><br>
+		<label>Body: <textarea name="body"></textarea></label><br>
+		<p>A note about the body: TODO sanitization text</p>
+		<label>Code for authentication: <input name="code"></label>
+		<button type="submit">Submit</button>
+	</form>
+	<% updates.forEach(function(update) { %>
+		<h3><%= update.title %></h3>
+		<p><%= update.body %></h3>
+		<p>Submitted on <%= update.date %></h3>
+		<form action="/deleteUpdate" method="POST">
+			<input type="hidden" name="id" value="<%= update.id %>">
+			<label>Code for authentication: <input name="code"></label>
+			<button type="submit">Delete this update (this action is irreversible)</button>
+		</form>
+	<% }) %>
+	<h2>Documents</h2>
+	<form action="/createDoc" method="POST">
+		<label>Title: <input name="title"></label><br>
+		<label>Category: <input name="category"></label><br>
+		<label>Body: <input name="body"></label><br>
+		<label>Code for authentication: <input name="code"></label>
+		<button type="submit">Submit</button>
+	</form>
+	<table border="1">
+		<tr>
+			<th>Title</th>
+			<th>Category</th>
+			<th>Body</th>
+			<th>Submitted on</th>
+			<th>Delete</th>
+		</tr>
+		<% documents.forEach(function(document) { %>
+			<tr>
+				<td><%= document.title %></td>
+				<td><%= document.category %></td>
+				<td><%= document.body %></td>
+				<td><%= document.date %></td>
+				<td>
+					<form action="/deleteDoc" method="POST">
+						<input type="hidden" name="id" value="<%= document.id %>">
+						<label>Code for authentication: <input name="code"></label>
+						<button type="submit">Delete this document (this action is irreversible)</button>
+					</form>
+				</td>
+			</tr>
+		<% }) %>
+	</table>
+</body>
+</html>

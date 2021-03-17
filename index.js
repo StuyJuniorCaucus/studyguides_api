@@ -7,29 +7,30 @@ import cors from "cors"
 const app = express()
 app.set("view engine", "ejs")
 app.use(express.urlencoded())
-const port = process.env.PORT || 8080
+const PORT = process.env.PORT || 8080
+const CODE = process.env.CODE || "test"
 
-import {init, newGuide, getGuides, allGuides, approveGuide, deleteGuide} from "./db.js"
-await init()
+import db from "./db.js"
+await db.init()
 
 app.get("/", (req, res) => {
 	res.sendFile("views/index.html", {root: dirname(fileURLToPath(import.meta.url))})
 })
 app.get("/guides", cors(), async (req, res) => {
-	res.json(await getGuides())
+	res.json(await db.guides.get())
 })
 app.get("/approve", async (req, res) => {
-	res.render("approve.ejs", {guides: await allGuides()})
+	res.render("approve.ejs", {guides: await db.guides.all()})
 })
 app.post("/approve", async (req, res) => {
-	if (req.body.code !== (process.env.CODE || "test")) {
+	if (req.body.code !== CODE) {
 		res.send("Invalid code!")
 		return
 	}
 	Object.entries(req.body).forEach(e => {
 		if (e[0] === "code" || e[1] !== "on" || !/(?:delete|approve)\d+/.test(e[0])) return
-		if (e[0].startsWith("delete")) deleteGuide(Number(e[0].slice("delete".length)))
-		if (e[0].startsWith("approve")) approveGuide(Number(e[0].slice("approve".length)))
+		if (e[0].startsWith("delete")) db.guides.delete(Number(e[0].slice("delete".length)))
+		if (e[0].startsWith("approve")) db.guides.approve(Number(e[0].slice("approve".length)))
 	})
 	res.redirect("/approve")
 })
@@ -38,7 +39,7 @@ app.post("/submit", cors(), async (req, res) => {
 		res.send(400, "One or more parameters is missing!")
 		return
 	}
-	await newGuide({
+	await db.guides.new({
 		submittedBy: req.body.submittedBy,
 		title: req.body.title,
 		subject: req.body.subject,
@@ -48,4 +49,45 @@ app.post("/submit", cors(), async (req, res) => {
 	res.redirect("https://stuyjuniorcaucus.github.io/study_guides.html")
 })
 
-app.listen(port, () => console.log("Started"))
+app.get("/updatesAndDocuments", async (req, res) => {
+	res.render("updatesAndDocuments.ejs", {updates: await db.updates.get(), documents: await db.documents.get()})
+})
+app.get("/updates", async (req, res) => {
+	res.json(await db.updates.get())
+})
+app.get("/documents", async (req, res) => {
+	const documents = await db.documents.get()
+	const restructuredDocuments = {}
+	documents.forEach(doc => {
+		if (restructuredDocuments[doc.category]) restructuredDocuments[doc.category].push(doc);
+		else restructuredDocuments[doc.category] = [doc]
+	})
+	res.json(restructuredDocuments)
+})
+
+app.post("/createUpdate", async (req, res) => {
+	if (!req.body.title || !req.body.body || !req.body.code) {
+		res.send(400, "One or more parameters is missing!")
+		return
+	}
+	if (req.body.code !== CODE) {
+		res.send("Invalid code!")
+		return
+	}
+	await db.updates.new({title: req.body.title, body: req.body.body})
+	res.redirect("/updatesAndDocuments")
+})
+app.post("/createDoc", async (req, res) => {
+	if (!req.body.title || !req.body.body || !req.body.category || !req.body.code) {
+		res.send(400, "One or more parameters is missing!")
+		return
+	}
+	if (req.body.code !== CODE) {
+		res.send("Invalid code!")
+		return
+	}
+	await db.documents.new({title: req.body.title, body: req.body.body, category: req.body.category})
+	res.redirect("/updatesAndDocuments")
+})
+
+app.listen(PORT, () => console.log("Started"))
